@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Matrix</title>
+    </head>
+    <body>
+        <h1 id="text">Matrix it up!</h1>
+        <script>
+            function matrixItUp(element, interval = 60) {
+                const originalText = element.innerText.split(''); // Javascript strings are immutable, so convert them into an array. Sigh.
+                let currentText = [...originalText];
+                const textLength = originalText.length;
+                const chars = "!@#$%^&*()_-+={}[]".split('');;
+                let textMask = [];
+                for (let i = 0; i < textLength; i++) {
+                    textMask.push(true);
+                }
+                let unsetCharsRemaining = textMask.length;
+                let iterations = 0;
+                intervalId = setInterval(function() {
+                    let fixedChar = false;
+                    for (let i = 0; i < textMask.length; i++) {
+                        if (textMask[i] === false) {
+                            continue;
+                        }
+                        // @Improvement: This would be much nicer if we just upped the probability by a factor dependend on the iterations instead of this if/else mess.
+                        if (iterations > 20) {
+                            fixedChar = Math.random() < 0.60; // 60% probability of returning true
+                        } else if (iterations > 30) {
+                            fixedChar = Math.random() < 0.80; // 80% probability of returning true
+                        } else if (iterations > 90) {
+                            fixedChar = Math.random() < 0.95; // 95% probability of returning true
+                        } else if (iterations > 100) { // Don't let the user wait too long
+                            fixedChar = true;
+                        } else {
+                            const factor = 4;
+                            fixedChar = Math.random() < (unsetCharsRemaining / textMask.length / factor); // Choose the initial probability as the percentage of the remaining unset chars in the text downscaled by an abitrary factor.
+                        }
+
+                        if (fixedChar === true) {
+                            textMask[i] = false;
+                            unsetCharsRemaining--;
+                            currentText[i] = originalText[i];
+                            element.innerText = currentText.join('');
+                            continue;
+                        }
+                        const replacementChar = chars[Math.floor(Math.random() * chars.length)];
+                        currentText[i] = replacementChar;
+                        element.innerText = currentText.join('');
+                    }
+                    if (unsetCharsRemaining === 0) {
+                        clearInterval(intervalId);
+                    }
+                    iterations++;
+                }, interval);
+            }
+            const element = document.getElementById("text");
+            matrixItUp(element);
+        </script>
+    </body>
+</html>
